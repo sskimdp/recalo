@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-label="Recalo">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0a84ff"/>
+      <stop offset="1" stop-color="#5856d6"/>
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="42" fill="url(#bg)"/>
+  <g fill="none" stroke="#fff" stroke-width="10" stroke-linejoin="round">
+    <rect x="34" y="62" width="88" height="104" rx="16" fill="#fff" fill-opacity="0.22"/>
+    <path d="M70 32h72a16 16 0 0 1 16 16v86" stroke-linecap="round"/>
+  </g>
+  <path d="M56 92h44M56 112h58M56 132h34" stroke="#fff" stroke-width="9" stroke-linecap="round"/>
+</svg>

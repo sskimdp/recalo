@@ -1,0 +1,14 @@
+{
+  "name": "recalo-pwa",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "npx serve . -l 4173",
+    "test": "node --test tests/app.test.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.63.0",
+    "skillui": "^1.3.4"
+  }
+}
