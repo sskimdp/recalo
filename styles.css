@@ -813,3 +813,5 @@ button:disabled { cursor: default; opacity: 0.35; }
 }
 .sync-form input:focus { background: var(--bg); box-shadow: 0 0 0 2px var(--accent); }
 .sync-note { margin: 0 0 14px; color: var(--label-2); font-size: 0.9375rem; }
+.sync-or { margin: 14px 0 12px; color: var(--label-3); font-size: 0.875rem; text-align: center; }
+.sync-form form { display: grid; gap: 14px; }

@@ -1,5 +1,5 @@
 import { SORT_MODES, blankCard, createWheelSwipe, filterSets, gradeAnswer, maskHint, mergeSets, mergeTombstones, moveItem, nextCardState, parseImportedCards, pickOptions, pluralCards, progressSummary, shuffle, sortSets } from './logic.js';
-import { isConfigured, onSyncState, pushSets, signIn, signOutUser, startSync, syncState } from './sync.js';
+import { isConfigured, onSyncState, pushSets, signIn, signInWithGoogle, signOutUser, startSync, syncState } from './sync.js';
 
 const STORAGE = 'recalo-sets-v1';
 const SETTINGS = 'recalo-settings-v1';
@@ -159,6 +159,7 @@ const icons = {
   reset: '<path d="M4.5 12a7.5 7.5 0 1 0 2.4-5.5M4 4.5V10h5.5"/>',
   learn: '<path d="M12 4.5L21 9l-9 4.5L3 9z"/><path d="M6.5 11v5c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5v-5"/>',
   cloud: '<path d="M7.5 18.5a4 4 0 0 1-.3-8A5.5 5.5 0 0 1 18 10.4a4 4 0 0 1-.5 8z"/>',
+  google: '<path d="M21 12.2c0-.7-.06-1.36-.18-2H12v3.8h5.05a4.3 4.3 0 0 1-1.87 2.82v2.35h3.02C19.96 17.5 21 15.1 21 12.2z" fill="currentColor" stroke="none"/><path d="M12 21.5c2.52 0 4.63-.83 6.2-2.26l-3.02-2.35c-.84.56-1.9.9-3.18.9-2.44 0-4.5-1.65-5.24-3.87H3.63v2.42A9.36 9.36 0 0 0 12 21.5z" fill="currentColor" stroke="none"/><path d="M6.76 13.92a5.6 5.6 0 0 1 0-3.58V7.92H3.63a9.36 9.36 0 0 0 0 8.42l3.13-2.42z" fill="currentColor" stroke="none"/><path d="M12 6.47c1.38 0 2.61.47 3.58 1.4l2.68-2.68C16.63 3.7 14.52 2.8 12 2.8a9.36 9.36 0 0 0-8.37 5.12l3.13 2.42C7.5 8.12 9.56 6.47 12 6.47z" fill="currentColor" stroke="none"/>',
   person: '<circle cx="12" cy="8" r="3.5"/><path d="M5 20c.7-3.6 3.6-5.5 7-5.5s6.3 1.9 7 5.5"/>',
   streak: '<path d="M13 3l-6.5 9H11l-1 9 7-9.5h-4.5z"/>',
 };
@@ -618,7 +619,7 @@ function renderSync() {
   const status = {
     off: ['Синхронизация не настроена', 'Данные хранятся только в этом браузере. Настройте Firebase по инструкции docs/setup-sync.md.'],
     connecting: ['Подключение…', 'Связываемся с облаком.'],
-    'signed-out': ['Вход не выполнен', 'Войдите по ссылке на почту, чтобы наборы синхронизировались между iPhone и Mac.'],
+    'signed-out': ['Вход не выполнен', 'Войдите, чтобы наборы и прогресс синхронизировались между iPhone и Mac.'],
     syncing: ['Синхронизация…', 'Получаем данные из облака.'],
     ready: [`Вы вошли: ${escape(state.email ?? '')}`, 'Наборы и прогресс синхронизируются автоматически.'],
     error: ['Ошибка синхронизации', escape(state.error ?? '')],
@@ -630,16 +631,20 @@ function renderSync() {
       <span class="sync-icon ${state.status}">${svg('cloud')}</span>
       <h2>${status[0]}</h2>
       <p>${status[1]}</p>
-      ${state.status === 'signed-out' ? `<form id="sign-in-form" class="sync-form">
-        <label class="field"><input id="sign-in-email" type="email" inputmode="email" autocomplete="email" placeholder="Почта" required><span class="field-label">Почта для входа</span></label>
-        <button class="button primary wide" type="submit">Прислать ссылку для входа</button>
-      </form>` : ''}
+      ${state.status === 'signed-out' ? `<div class="sync-form">
+        <button class="button primary wide" data-action="sign-in-google">${svg('google')}Войти через Google</button>
+        <p class="sync-or">или по ссылке на почту</p>
+        <form id="sign-in-form">
+          <label class="field"><input id="sign-in-email" type="email" inputmode="email" autocomplete="email" placeholder="Почта" required><span class="field-label">Почта для входа</span></label>
+          <button class="button tinted wide" type="submit">Прислать ссылку</button>
+        </form>
+      </div>` : ''}
       ${state.status === 'ready' ? '<button class="button tinted wide" data-action="sign-out">Выйти</button>' : ''}
     </section>
     <h2 class="section-title">Резервная копия</h2>
     <p class="sync-note">Копия содержит все наборы, прогресс и даты. Её можно перенести на другое устройство или сохранить на всякий случай.</p>
     <div class="detail-tools">
-      <button class="button tinted" data-action="backup">${svg('export')}Сохранить копию</button>
+      <button class="button tinted" data-action="backup">${svg('export')}Сохранить</button>
       <button class="button tinted" data-action="restore">${svg('import')}Восстановить</button>
     </div>
     <input type="file" id="restore-file" accept="application/json,.json" hidden>
@@ -1323,6 +1328,9 @@ document.addEventListener('click', (event) => {
     sync: () => go({ page: 'sync' }),
     backup: backupAll,
     restore: () => document.querySelector('#restore-file').click(),
+    'sign-in-google': async () => {
+      try { await signInWithGoogle(); } catch (error) { showToast(`Не удалось войти: ${error.message}`); }
+    },
     'sign-out': async () => { await signOutUser(); showToast('Вы вышли из аккаунта'); },
     'undo-sort': undoSort,
   };

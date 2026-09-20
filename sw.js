@@ -1,4 +1,4 @@
-const CACHE = 'recalo-v1';
+const CACHE = 'recalo-v2';
 const ASSETS = ['./', './index.html', './styles.css', './app.js', './logic.js', './sync.js', './firebase-config.js', './manifest.webmanifest', './icon.svg', './apple-touch-icon.png', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', (event) => event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS))));
 self.addEventListener('activate', (event) => event.waitUntil((async () => {

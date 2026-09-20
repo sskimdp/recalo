@@ -47,6 +47,9 @@ export async function startSync({ onRemote, onMerged }) {
     auth = auth ?? firebase.getAuth(app);
     db = db ?? firebase.initializeFirestore(app, { localCache: firebase.persistentLocalCache({}) });
 
+    // Возврат после входа через Google в режиме перенаправления.
+    try { await firebase.getRedirectResult(auth); } catch (error) { setState({ error: error.message }); }
+
     // Возврат по ссылке из письма: адрес мы сохранили перед отправкой.
     if (firebase.isSignInWithEmailLink(auth, window.location.href)) {
       const email = localStorage.getItem(EMAIL_KEY) || window.prompt('Введите почту, на которую пришла ссылка') || '';
@@ -93,6 +96,20 @@ export function pushSets(sets, deleted) {
       setState({ status: 'error', error: error.message });
     }
   }, 800);
+}
+
+// В установленном на iPhone приложении всплывающее окно часто недоступно,
+// поэтому при отказе переходим на вход с перенаправлением.
+export async function signInWithGoogle() {
+  const firebase = await loadSdk();
+  const provider = new firebase.GoogleAuthProvider();
+  try {
+    await firebase.signInWithPopup(auth, provider);
+  } catch (error) {
+    const fallback = ['auth/popup-blocked', 'auth/popup-closed-by-user', 'auth/operation-not-supported-in-this-environment', 'auth/cancelled-popup-request'];
+    if (!fallback.includes(error.code)) throw error;
+    await firebase.signInWithRedirect(auth, provider);
+  }
 }
 
 export async function signIn(email) {
