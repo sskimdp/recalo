@@ -1,5 +1,5 @@
-const CACHE = 'recalo-v3';
-const ASSETS = ['./', './index.html', './styles.css', './app.js', './logic.js', './sync.js', './firebase-config.js', './manifest.webmanifest', './icon.svg', './apple-touch-icon.png', './icon-192.png', './icon-512.png'];
+const CACHE = 'recalo-v4';
+const ASSETS = ['./', './index.html', './styles.css', './app.js', './logic.js', './sync.js', './firebase-config.js', './manifest.webmanifest', './icon.svg', './apple-touch-icon.png', './icon-32.png', './icon-48.png', './icon-64.png', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', (event) => event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS))));
 self.addEventListener('activate', (event) => event.waitUntil((async () => {
   // Drop caches left over from previous versions, or they pile up in the browser.
