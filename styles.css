@@ -823,3 +823,30 @@ button:disabled { cursor: default; opacity: 0.35; }
 html[data-page="study"], html[data-page="study"] body { overflow: hidden; overscroll-behavior: none; height: 100%; }
 html[data-page="study"] .app-shell { min-height: 100dvh; padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
 html { touch-action: manipulation; }
+
+/* ---------- Неподвижная шапка экранов со списками ---------- */
+.page-head {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  margin: 0 -16px;
+  padding: 0 16px 2px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+}
+.page-head .bar { position: static; background: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+.page-head .search { margin-bottom: 12px; }
+.page-head .title-sub { margin-bottom: 16px; }
+/* Мягкий край вместо жёсткой линии: список плавно уходит под шапку. */
+.page-head::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -14px;
+  height: 14px;
+  background: linear-gradient(var(--bg), transparent);
+  pointer-events: none;
+}
+@media (prefers-reduced-transparency: reduce) { .page-head { background: var(--bg); backdrop-filter: none; -webkit-backdrop-filter: none; } }

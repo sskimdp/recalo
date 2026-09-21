@@ -174,6 +174,8 @@ const tabBar = () => `<nav class="tab-bar" aria-label="Разделы"><div clas
 const searchField = (placeholder) => `<label class="search">${svg('search')}<input type="search" id="search" placeholder="${placeholder}" value="${escape(query)}" autocomplete="off" autocapitalize="off" spellcheck="false"></label>`;
 const visibleSets = () => sortSets(filterSets(sets, query), settings.sort);
 const nothingFound = () => `<div class="empty"><strong>Ничего не найдено</strong><p>Нет наборов с названием «${escape(query)}».</p></div>`;
+// Header of a list screen stays put; only the list below it scrolls.
+const pageHead = (barHtml, inner) => `<div class="page-head">${barHtml}${inner}</div>`;
 const empty = (title, text, button = '') => `<div class="empty">${svg('folder', 'empty-icon')}<strong>${title}</strong><p>${text}</p>${button}</div>`;
 
 // The browser's Back button and the iPhone's swipe-back gesture should step through the
@@ -227,10 +229,10 @@ function render() {
 
 function renderSets() {
   const buttons = `<button class="bar-button round" data-action="sync" aria-label="Аккаунт и данные">${svg('person')}</button><button class="bar-button round" data-action="sort" aria-label="Сортировка">${svg('sort')}</button><button class="bar-button round" data-action="create" aria-label="Новый набор">${svg('plus')}</button>`;
-  app.innerHTML = `${bar('', buttons)}
+  app.innerHTML = `${pageHead(bar('', buttons), `
     <h1 class="large-title">Наборы</h1>
     ${sets.length ? searchField('Поиск по названию') : ''}
-    ${settings.sort !== 'none' && sets.length ? `<p class="sort-note">${SORT_MODES[settings.sort]}</p>` : ''}
+    ${settings.sort !== 'none' && sets.length ? `<p class="sort-note">${SORT_MODES[settings.sort]}</p>` : ''}`)}
     <div id="set-list">${setList()}</div>${tabBar()}`;
 }
 
@@ -278,15 +280,15 @@ function renderModes() {
   const content = sets.length
     ? `<div class="mode-tiles">${Object.entries(MODES).map(([mode, { title, icon, note }]) => `<button class="mode-tile ${mode}" data-pick="${mode}"><span class="mode-tile-icon">${svg(icon)}</span><span class="mode-tile-title">${title}</span><span class="mode-tile-note">${note}</span></button>`).join('')}</div>`
     : empty('Сначала создайте набор', 'После этого здесь появятся режимы повторения.', `<button class="button primary" data-action="create">${svg('plus')}Новый набор</button>`);
-  app.innerHTML = `${bar()}<h1 class="large-title">Режимы</h1><p class="title-sub">Выберите режим, потом набор</p>${content}${tabBar()}`;
+  app.innerHTML = `${pageHead(bar(), '<h1 class="large-title">Режимы</h1><p class="title-sub">Выберите режим, потом набор</p>')}${content}${tabBar()}`;
 }
 
 function renderPick() {
   const mode = MODES[screen.mode];
-  app.innerHTML = `${bar(backButton('modes', 'Режимы'))}
+  app.innerHTML = `${pageHead(bar(backButton('modes', 'Режимы')), `
     <h1 class="large-title">${mode.title}</h1>
     <p class="title-sub">Выберите набор</p>
-    ${sets.length ? searchField('Поиск по названию') : ''}
+    ${sets.length ? searchField('Поиск по названию') : ''}`)}
     <div id="set-list">${pickList()}</div>${tabBar()}`;
 }
 
