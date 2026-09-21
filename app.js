@@ -220,6 +220,8 @@ window.addEventListener('popstate', async (event) => {
 
 function render() {
   const views = { sets: renderSets, detail: renderDetail, editor: renderEditor, modes: renderModes, pick: renderPick, study: renderStudy, learn: renderLearn, sync: renderSync };
+  // The flashcard screen is locked in place: a swipe must move the card, never the page.
+  document.documentElement.dataset.page = screen.page;
   views[screen.page]();
 }
 
@@ -994,12 +996,14 @@ function bindStudyCard() {
   const card = document.querySelector('#study-card');
   let start = null;
   let dragging = false;
+  let moved = 0;
   let history = [];
 
   card.addEventListener('pointerdown', (event) => {
     if (study.leaving || event.button > 0) return;
     start = { x: event.clientX, y: event.clientY };
     dragging = false;
+    moved = 0;
     history = [{ x: event.clientX, t: event.timeStamp }];
     card.setPointerCapture(event.pointerId);
     card.classList.add('pressing');
@@ -1008,6 +1012,7 @@ function bindStudyCard() {
     if (!start) return;
     const dx = event.clientX - start.x;
     const dy = event.clientY - start.y;
+    moved = Math.max(moved, Math.hypot(dx, dy));
     if (!dragging && Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) {
       dragging = true;
       card.classList.remove('pressing');
@@ -1031,7 +1036,8 @@ function bindStudyCard() {
     const dx = event.clientX - start.x;
     start = null;
     if (!dragging) {
-      if (event.type === 'pointerup') flipCard(card);
+      // Only a real tap flips the card; a vertical drag across it is not a tap.
+      if (event.type === 'pointerup' && moved < 12) flipCard(card);
       return;
     }
     const first = history[0];

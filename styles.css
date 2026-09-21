@@ -382,12 +382,12 @@ button:disabled { cursor: default; opacity: 0.35; }
 .counter { color: var(--label-2); font-weight: 500; font-size: 0.9375rem; }
 .progress { height: 4px; margin: 6px 0 0; border-radius: 2px; background: var(--fill); overflow: hidden; }
 .progress i { display: block; height: 100%; background: var(--accent); transform-origin: left; transition: transform 350ms var(--ease-out); }
-.deck { position: relative; height: clamp(320px, 58vh, 480px); margin: 28px 0 20px; }
+.deck { position: relative; height: clamp(280px, 56dvh, 480px); margin: 24px 0 20px; }
 .study-card {
   position: absolute;
   inset: 0;
   cursor: grab;
-  touch-action: pan-y;
+  touch-action: none;
   user-select: none;
   -webkit-user-select: none;
   will-change: transform;
@@ -815,3 +815,11 @@ button:disabled { cursor: default; opacity: 0.35; }
 .sync-note { margin: 0 0 14px; color: var(--label-2); font-size: 0.9375rem; }
 .sync-or { margin: 14px 0 12px; color: var(--label-3); font-size: 0.875rem; text-align: center; }
 .sync-form form { display: grid; gap: 14px; }
+
+/* Экран карточек не прокручивается: свайп двигает только карточку.
+   Запрет ставится на каждый элемент внутри: из-за 3D-переворота карточки
+   браузер не наследует touch-action от родителя и отдаёт жест прокрутке. */
+.deck, .deck * { touch-action: none; }
+html[data-page="study"], html[data-page="study"] body { overflow: hidden; overscroll-behavior: none; height: 100%; }
+html[data-page="study"] .app-shell { min-height: 100dvh; padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+html { touch-action: manipulation; }
